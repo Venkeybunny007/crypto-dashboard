@@ -41,8 +41,11 @@ export function CryptoCard({
                   alt={`${name} logo`} 
                   className="w-10 h-10 rounded-full"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                    (e.target as HTMLImageElement).nextElementSibling!.style.display = 'block';
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    if (target.nextElementSibling) {
+                      (target.nextElementSibling as HTMLElement).style.display = 'block';
+                    }
                   }}
                 />
               ) : null}

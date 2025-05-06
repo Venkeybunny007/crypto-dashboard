@@ -137,10 +137,12 @@ export const generatePredictionData = (id: string, days = 14) => {
 // Get formatted historical data for charts
 export const getHistoricalChartData = (id: string, days = 30) => {
   const data = generateHistoricalData(id, days);
-  return data.map(d => ({
-    date: new Date(d.timestamp).toLocaleDateString(),
-    price: d.price
-  }));
+  return Promise.resolve(data).then(data => 
+    data.map((d: any) => ({
+      date: new Date(d.timestamp).toLocaleDateString(),
+      price: d.price
+    }))
+  );
 };
 
 // Exchange rates for currency converter

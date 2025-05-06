@@ -5,29 +5,50 @@ import { Footer } from "@/components/layout/Footer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PredictionChart } from "@/components/crypto/PredictionChart";
-import { getCryptoData, getHistoricalChartData, generatePredictionData } from "@/services/cryptoService";
+import { cryptocurrencies } from "@/services/cryptoService";
+import { getHistoricalChartData, generatePredictionData } from "@/services/cryptoService";
+
+type CryptoDataItem = {
+  id: string;
+  name: string;
+  symbol: string;
+  rank: number;
+  price?: number;
+  change24h?: number;
+  marketCap?: number;
+  volume?: number;
+  image?: string | null;
+};
 
 const Prediction = () => {
-  const [cryptoData, setCryptoData] = useState<ReturnType<typeof getCryptoData>>([]);
+  const [cryptoData, setCryptoData] = useState<CryptoDataItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectedCryptoId, setSelectedCryptoId] = useState("bitcoin");
   const [historicalData, setHistoricalData] = useState<{ date: string; price: number }[]>([]);
   const [predictionData, setPredictionData] = useState<ReturnType<typeof generatePredictionData>>([]);
 
   useEffect(() => {
-    // Fetch crypto data
-    const data = getCryptoData();
-    setCryptoData(data);
+    // Set initial crypto data
+    setCryptoData(cryptocurrencies);
     
     // Get historical and prediction data for the default selection
     loadCryptoData("bitcoin");
+    setLoading(false);
   }, []);
 
-  const loadCryptoData = (id: string) => {
-    const historicalData = getHistoricalChartData(id, 90);
-    const predictionData = generatePredictionData(id, 14);
-    
-    setHistoricalData(historicalData);
-    setPredictionData(predictionData);
+  const loadCryptoData = async (id: string) => {
+    setLoading(true);
+    try {
+      const historicalData = await getHistoricalChartData(id, 90);
+      const predictionData = generatePredictionData(id, 14);
+      
+      setHistoricalData(historicalData);
+      setPredictionData(predictionData);
+    } catch (error) {
+      console.error("Error loading crypto data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCryptoChange = (value: string) => {
@@ -74,7 +95,11 @@ const Prediction = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="pt-6">
-                  {selectedCrypto && (
+                  {loading ? (
+                    <div className="flex justify-center items-center h-[350px]">
+                      <p>Loading chart data...</p>
+                    </div>
+                  ) : selectedCrypto && (
                     <PredictionChart
                       symbol={selectedCrypto.symbol}
                       name={selectedCrypto.name}
