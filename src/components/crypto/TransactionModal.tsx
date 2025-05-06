@@ -39,7 +39,10 @@ export function TransactionModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
-  if (!coin) return null;
+  // Early return with null if coin is undefined
+  if (!coin) {
+    return null;
+  }
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

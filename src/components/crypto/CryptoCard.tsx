@@ -43,8 +43,9 @@ export function CryptoCard({
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
-                    if (target.nextElementSibling) {
-                      (target.nextElementSibling as HTMLElement).style.display = 'block';
+                    const nextSibling = target.nextElementSibling as HTMLElement | null;
+                    if (nextSibling) {
+                      nextSibling.style.display = 'block';
                     }
                   }}
                 />
