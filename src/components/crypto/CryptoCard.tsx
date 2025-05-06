@@ -28,10 +28,10 @@ export function CryptoCard({
   
   return (
     <Card 
-      className="overflow-hidden hover-lift cursor-pointer transition-transform hover:scale-[1.01] hover:shadow-md" 
+      className="overflow-hidden hover-lift cursor-pointer transition-all hover:shadow-md perspective-container" 
       onClick={onClick}
     >
-      <CardContent className="p-4">
+      <CardContent className="p-4 coin-3d">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
