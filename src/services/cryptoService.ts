@@ -185,7 +185,7 @@ export const transactionHistory = [
   { 
     id: 't1', 
     date: '2023-05-02', 
-    type: 'buy', 
+    type: 'buy' as const, 
     amount: 0.05, 
     symbol: 'BTC', 
     price: 56420.15, 
@@ -194,7 +194,7 @@ export const transactionHistory = [
   { 
     id: 't2', 
     date: '2023-04-28', 
-    type: 'buy', 
+    type: 'buy' as const, 
     amount: 0.75, 
     symbol: 'ETH', 
     price: 2980.25, 
@@ -203,7 +203,7 @@ export const transactionHistory = [
   { 
     id: 't3', 
     date: '2023-04-25', 
-    type: 'sell', 
+    type: 'sell' as const, 
     amount: 0.02, 
     symbol: 'BTC', 
     price: 55210.40, 
@@ -212,7 +212,7 @@ export const transactionHistory = [
   { 
     id: 't4', 
     date: '2023-04-20', 
-    type: 'buy', 
+    type: 'buy' as const, 
     amount: 5.5, 
     symbol: 'SOL', 
     price: 118.75, 
@@ -221,7 +221,7 @@ export const transactionHistory = [
   { 
     id: 't5', 
     date: '2023-04-15', 
-    type: 'buy', 
+    type: 'buy' as const, 
     amount: 250, 
     symbol: 'XRP', 
     price: 0.52, 

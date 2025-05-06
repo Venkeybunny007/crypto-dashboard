@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
-type Transaction = {
+export type Transaction = {
   id: string;
   date: string;
   type: 'buy' | 'sell';
