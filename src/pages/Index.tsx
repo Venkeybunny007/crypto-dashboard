@@ -54,7 +54,7 @@ const Index = () => {
                   <div className="flex flex-col md:flex-row justify-between items-center">
                     <div className="z-10 mb-6 md:mb-0">
                       <h1 className="text-3xl md:text-4xl font-bold mb-4">
-                        CryptoOracle Dashboard
+                        Crypto Dashboard
                       </h1>
                       <p className="text-lg opacity-90 max-w-md">
                         Track, predict, and analyze cryptocurrencies with AI-powered insights and 3D visualizations.
@@ -98,9 +98,9 @@ const Index = () => {
               <div className="space-y-8">
                 {/* Top Cryptocurrencies */}
                 <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Top Cryptocurrencies</h2>
+                  <h2 className="text-xl font-semibold">All Cryptocurrencies</h2>
                   <div className="grid gap-4">
-                    {cryptoData.slice(0, 4).map((crypto) => (
+                    {cryptoData.map((crypto) => (
                       <CryptoCard
                         key={crypto.id}
                         name={crypto.name}

@@ -18,7 +18,7 @@ export function Header() {
             <CryptoLogo />
           </div>
           <Link to="/" className="text-xl font-bold">
-            CryptoOracle
+            Crypto Dashboard
           </Link>
         </div>
         
