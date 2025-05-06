@@ -9,35 +9,76 @@ import { WalletCard } from "@/components/crypto/WalletCard";
 import { NewsCard } from "@/components/crypto/NewsCard";
 import { TransactionList } from "@/components/crypto/TransactionList";
 import FloatingCoins from "@/components/3d/FloatingCoins";
-import { getCryptoData, generateHistoricalData, walletData, newsData, transactionHistory } from "@/services/cryptoService";
+import { getCryptoData, generateHistoricalData, walletData, newsData, transactionHistory, Transaction } from "@/services/cryptoService";
 import { ThemeProvider } from "@/hooks/use-theme";
+import { useToast } from "@/hooks/use-toast";
+
+// Define a type for crypto data
+type CryptoData = {
+  id: string;
+  name: string;
+  symbol: string;
+  rank: number;
+  price: number;
+  change24h: number;
+  marketCap: number;
+  volume: number;
+  image?: string | null;
+};
 
 const Index = () => {
-  const [cryptoData, setCryptoData] = useState<ReturnType<typeof getCryptoData>>([]);
-  const [selectedCrypto, setSelectedCrypto] = useState<(typeof cryptoData)[0] | null>(null);
+  const [cryptoData, setCryptoData] = useState<CryptoData[]>([]);
+  const [selectedCrypto, setSelectedCrypto] = useState<CryptoData | null>(null);
   const [chartData, setChartData] = useState<{ timestamp: number; price: number }[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Fetch crypto data
-    const data = getCryptoData();
-    setCryptoData(data);
-    
-    // Set default selected crypto to Bitcoin
-    const bitcoin = data.find(crypto => crypto.id === 'bitcoin') || null;
-    setSelectedCrypto(bitcoin);
-    
-    if (bitcoin) {
-      const historicalData = generateHistoricalData(bitcoin.id);
-      setChartData(historicalData);
-    }
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        // Fetch crypto data
+        const data = await getCryptoData();
+        setCryptoData(data);
+        
+        // Set default selected crypto to Bitcoin
+        const bitcoin = data.find(crypto => crypto.id === 'bitcoin') || null;
+        setSelectedCrypto(bitcoin);
+        
+        if (bitcoin) {
+          const historicalData = await generateHistoricalData(bitcoin.id);
+          setChartData(historicalData);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch cryptocurrency data. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const handleSelectCrypto = (crypto: typeof selectedCrypto) => {
+  const handleSelectCrypto = async (crypto: CryptoData) => {
     if (!crypto) return;
     
     setSelectedCrypto(crypto);
-    const historicalData = generateHistoricalData(crypto.id);
-    setChartData(historicalData);
+    try {
+      const historicalData = await generateHistoricalData(crypto.id);
+      setChartData(historicalData);
+    } catch (error) {
+      console.error(`Error fetching historical data for ${crypto.id}:`, error);
+      toast({
+        title: "Error",
+        description: `Failed to load historical data for ${crypto.name}.`,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -96,30 +137,36 @@ const Index = () => {
               </div>
               
               <div className="space-y-8">
-                {/* Top Cryptocurrencies */}
+                {/* All Cryptocurrencies */}
                 <div className="space-y-4">
                   <h2 className="text-xl font-semibold">All Cryptocurrencies</h2>
-                  <div className="grid gap-4">
-                    {cryptoData.map((crypto) => (
-                      <CryptoCard
-                        key={crypto.id}
-                        name={crypto.name}
-                        symbol={crypto.symbol}
-                        price={crypto.price}
-                        change24h={crypto.change24h}
-                        marketCap={crypto.marketCap}
-                        volume={crypto.volume}
-                        onClick={() => handleSelectCrypto(crypto)}
-                      />
-                    ))}
-                  </div>
+                  {isLoading ? (
+                    <div className="flex justify-center p-8">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4">
+                      {cryptoData.map((crypto) => (
+                        <CryptoCard
+                          key={crypto.id}
+                          name={crypto.name}
+                          symbol={crypto.symbol}
+                          price={crypto.price}
+                          change24h={crypto.change24h}
+                          marketCap={crypto.marketCap}
+                          volume={crypto.volume}
+                          onClick={() => handleSelectCrypto(crypto)}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
                 
                 {/* Wallet Overview */}
                 <WalletCard coins={walletData.coins} totalValue={walletData.totalValue} />
                 
                 {/* Recent Transactions */}
-                <TransactionList transactions={transactionHistory} />
+                <TransactionList transactions={transactionHistory as Transaction[]} />
               </div>
             </div>
           </div>
@@ -132,3 +179,4 @@ const Index = () => {
 };
 
 export default Index;
+

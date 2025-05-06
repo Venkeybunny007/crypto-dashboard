@@ -1,6 +1,5 @@
-
-// This is a mock service that would normally fetch data from a real API
-// For a real app, you would replace this with actual API calls
+// Import the API service to fetch real-time data
+import { fetchCryptoPrices, fetchHistoricalData as fetchAPIHistoricalData } from './apiService';
 
 // Sample data for cryptocurrencies
 export const cryptocurrencies = [
@@ -14,7 +13,7 @@ export const cryptocurrencies = [
   { id: 'chainlink', name: 'Chainlink', symbol: 'LINK', rank: 8 }
 ];
 
-// Sample price data
+// Sample price data (fallback if API fails)
 export const cryptoPrices = {
   'bitcoin': 57320.42,
   'ethereum': 3120.15,
@@ -63,7 +62,18 @@ export const cryptoVolumes = {
 };
 
 // Generate historical price data for a given cryptocurrency
-export const generateHistoricalData = (id: string, days = 30) => {
+export const generateHistoricalData = async (id: string, days = 30) => {
+  try {
+    // Try to fetch data from API first
+    const apiData = await fetchAPIHistoricalData(id, days);
+    if (apiData && apiData.length > 0) {
+      return apiData;
+    }
+  } catch (error) {
+    console.error('Error fetching historical data, falling back to mock data:', error);
+  }
+  
+  // Fallback to mock data
   const basePrice = cryptoPrices[id as keyof typeof cryptoPrices] || 100;
   const volatility = id === 'bitcoin' ? 0.03 : id === 'ethereum' ? 0.05 : 0.08;
   const data = [];
@@ -278,13 +288,48 @@ export const newsData = [
   },
 ];
 
-// Get cryptocurrency data with prices and other metrics
-export const getCryptoData = () => {
+// Type definition for transactions
+export type Transaction = {
+  id: string;
+  date: string;
+  type: "buy" | "sell";
+  amount: number;
+  symbol: string;
+  price: number;
+  total: number;
+};
+
+// Get cryptocurrency data with prices and other metrics from the API
+export const getCryptoData = async () => {
+  try {
+    // Fetch real-time data from the API
+    const apiData = await fetchCryptoPrices();
+    
+    if (apiData && apiData.length > 0) {
+      return cryptocurrencies.map(crypto => {
+        const coinData = apiData.find((item: any) => item.id === crypto.id) || {};
+        
+        return {
+          ...crypto,
+          price: coinData.current_price || cryptoPrices[crypto.id as keyof typeof cryptoPrices] || 0,
+          change24h: coinData.price_change_percentage_24h || (cryptoChanges[crypto.id as keyof typeof cryptoChanges] || 0),
+          marketCap: coinData.market_cap || cryptoMarketCaps[crypto.id as keyof typeof cryptoMarketCaps] || 0,
+          volume: coinData.total_volume || cryptoVolumes[crypto.id as keyof typeof cryptoVolumes] || 0,
+          image: coinData.image || null
+        };
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching cryptocurrency data:', error);
+  }
+  
+  // Fallback to mock data if API fails
   return cryptocurrencies.map(crypto => ({
     ...crypto,
     price: cryptoPrices[crypto.id as keyof typeof cryptoPrices] || 0,
     change24h: cryptoChanges[crypto.id as keyof typeof cryptoChanges] || 0,
     marketCap: cryptoMarketCaps[crypto.id as keyof typeof cryptoMarketCaps] || 0,
     volume: cryptoVolumes[crypto.id as keyof typeof cryptoVolumes] || 0,
+    image: null
   }));
 };

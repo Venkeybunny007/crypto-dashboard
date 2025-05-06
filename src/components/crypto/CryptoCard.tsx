@@ -10,6 +10,7 @@ type CryptoCardProps = {
   change24h: number;
   marketCap: number;
   volume: number;
+  image?: string | null;
   onClick?: () => void;
 };
 
@@ -20,6 +21,7 @@ export function CryptoCard({
   change24h,
   marketCap,
   volume,
+  image,
   onClick,
 }: CryptoCardProps) {
   const isPositiveChange = change24h >= 0;
@@ -33,7 +35,20 @@ export function CryptoCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <CoinModel symbol={symbol} size={40} />
+              {image ? (
+                <img 
+                  src={image} 
+                  alt={`${name} logo`} 
+                  className="w-10 h-10 rounded-full"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    (e.target as HTMLImageElement).nextElementSibling!.style.display = 'block';
+                  }}
+                />
+              ) : null}
+              <div className={image ? "hidden" : "block"}>
+                <CoinModel symbol={symbol} size={40} />
+              </div>
             </div>
             <div>
               <h3 className="font-medium">{name}</h3>
